@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#1F7A58">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="AAJC26">
-<meta name="description" content="Match times, courts and venues for the All Africa Junior Championships 2026 in Cairo: your matches, your friends, your country, and how far behind schedule each venue is running.">
+<meta name="apple-mobile-web-app-title" content="TTR Valladolid">
+<meta name="description" content="Match times, courts, clubs and stats for the Castilla y León TOP TTR Valladolid Absoluto-Sénior: your matches, your friends, your country, and how far behind schedule each venue is running.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F7A58'/%3E%3Ccircle cx='32' cy='22' r='9' fill='%23fff'/%3E%3Cpath d='M20 54 L32 30 L44 54 Z' fill='%23fff' opacity='.9'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F7A58'/%3E%3Ccircle cx='32' cy='22' r='9' fill='%23fff'/%3E%3Cpath d='M20 54 L32 30 L44 54 Z' fill='%23fff' opacity='.9'/%3E%3C/svg%3E">
-<title>AAJC26 Cairo</title>
+<title>TTR Valladolid</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
 <style>
 :root{
@@ -314,7 +314,7 @@ button.f4row:active{background:var(--surface2)}
 </head>
 <body>
 <header class="top"><div class="top-in">
-  <div class="brand"><h1 id="ttl">AAJC26 Cairo</h1><small id="sub">All Africa Junior Championships · 30 Sep – 3 Oct</small></div>
+  <div class="brand"><h1 id="ttl">TTR Valladolid</h1><small id="sub">TOP TTR Absoluto-Sénior · 3 Oct</small></div>
   <div class="upd"><span class="dot" id="dot"></span><span id="updtxt">…</span></div>
   <button class="iconbtn" id="refresh" aria-label="Refresh" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
 </div></header>
@@ -324,7 +324,7 @@ button.f4row:active{background:var(--surface2)}
 <nav class="tabbar"><div class="tabbar-in">
   <button class="tab" data-tab="me" id="tab-me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</button>
   <button class="tab" data-tab="players" id="tab-players"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Players</button>
-  <button class="tab" data-tab="countries" id="tab-countries"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg>Countries</button>
+  <button class="tab" data-tab="countries" id="tab-countries"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/></svg>Clubs</button>
   <button class="tab" data-tab="venues" id="tab-venues"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 21v-6h6v6"/></svg>Venues</button>
   <button class="tab" data-tab="draws" id="tab-draws"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h5v4H3zM3 15h5v4H3zM16 10h5v4h-5z"/><path d="M8 7h3v10H8M11 12h5"/></svg>Draws</button>
   <button class="tab" data-tab="stats" id="tab-stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V6"/><path d="M17 16v-8"/></svg>Stats</button>
@@ -334,32 +334,31 @@ button.f4row:active{background:var(--surface2)}
 (function(){
 'use strict';
 /* ---------- configuration ---------- */
-// Everything that ties this site to one tournament lives here. To use it for another BWF tournament:
-//  - tmtId: the number in the tournament's bwfbadminton.com link, e.g. bwfbadminton.com/tournament/5796/...
-//  - code:  the long id in its tournamentsoftware link, e.g. bwf.tournamentsoftware.com/tournament/78E3A435-...
-//  - days, tz, venues: the playing days, the local time zone and which courts belong to which hall
+// This copy reads a tournament from badminton.es. The browser cannot read badminton.es itself, so fesba/scrape.py
+// (run every 10 minutes by a GitHub Action) writes data.json next to this page. The tournament is set in config.json;
+// what is here is only what the page shows before data.json has loaded.
 const CFG = {
-  name: 'AAJC26 Cairo',                                   // header and browser tab
-  subtitle: 'All Africa Junior Championships · 30 Sep – 3 Oct',
-  event: 'All Africa Junior Championships 2026',          // used in the share text
-  city: 'Cairo',                                          // "Times are local Cairo time"
-  tmtId: 5796,
-  code: '78E3A435-E0CE-48DD-A3F1-411D4C36E2A9',
-  api: 'https://extranet-lv.bwfbadminton.com/api/tournaments/day-matches',
-  days: ['2026-09-30','2026-10-01','2026-10-02','2026-10-03'],
-  tz: 'Africa/Cairo',
-  // One hall: every court the feed reports is added to it automatically, so the list only sets the minimum shown.
+  name: 'TTR Valladolid',
+  subtitle: 'TOP TTR Absoluto-Sénior · 3 Oct',
+  event: 'Castilla y León TOP TTR Valladolid',            // used in the share text
+  city: 'Valladolid',
+  tid: 'BD151966-B76B-4B1B-A591-E8DBDFB16D76',           // the id in the badminton.es link
+  site: 'https://www.badminton.es',
+  data: 'data.json',
+  days: ['2026-10-03'],                                  // replaced by the days in data.json
+  tz: 'Europe/Madrid',
   venues: {
-    A:{name:'Main hall', courts:[1,2,3,4,5,6], place:'Cairo Stadium Indoor Hall'}
+    A:{name:'Main hall', courts:[1,2,3,4,5,6], place:'Polideportivo Narciso Alonso Cortés'}
   },
-  ages: 'U',           // 'U' for junior events (U15, U17, U19), '+' for senior events (35+, 40+ ...)
-  storage: 'aajc26',   // prefix for what the site saves on the phone; change it for each tournament
-  counter: 'aajc26-javiigaar', // namespace of the anonymous usage counter; change it for each tournament
-  refreshMs: 60000,    // auto refresh of today while page is visible
-  futureMs: 15*60000,  // refetch future days when older than this
-  pastMs: 12*3600000   // refetch past days when older than this
+  storage: 'ttrva26',
+  counter: 'ttrva26-javiigaar',
+  refreshMs: 60000,
+  futureMs: 5*60000,
+  pastMs: 30*60000
 };
-function ageLbl(a){ return CFG.ages==='U'?'U'+a:a+'+'; }
+function ageLbl(a){ return a; }
+function lvlCmp(a,b){ return a===b?0:a==='Absoluto'?-1:b==='Absoluto'?1:String(a).localeCompare(String(b)); }
+let CLUBS={};
 const ISO = {ARM:'AM',AUT:'AT',AZE:'AZ',BEL:'BE',BIH:'BA',BLR:'BY',BUL:'BG',CRO:'HR',CYP:'CY',CZE:'CZ',DEN:'DK',ESP:'ES',EST:'EE',FIN:'FI',FRA:'FR',GBR:'GB',GEO:'GE',GER:'DE',GRE:'GR',HUN:'HU',IRL:'IE',ISL:'IS',ISR:'IL',ITA:'IT',KOS:'XK',LAT:'LV',LIE:'LI',LTU:'LT',LUX:'LU',MDA:'MD',MKD:'MK',MLT:'MT',MNE:'ME',NED:'NL',NOR:'NO',POL:'PL',POR:'PT',ROU:'RO',SLO:'SI',SMR:'SM',SRB:'RS',SUI:'CH',SVK:'SK',SWE:'SE',TUR:'TR',UKR:'UA',FRO:'FO',GIB:'GI',AND:'AD',MON:'MC',ALB:'AL',RUS:'RU',KAZ:'KZ',GRL:'GL',USA:'US',CAN:'CA',AUS:'AU',IND:'IN',JPN:'JP',CHN:'CN',KOR:'KR',INA:'ID',MAS:'MY',THA:'TH',SGP:'SG',RSA:'ZA',NZL:'NZ',BRA:'BR',PER:'PE',HKG:'HK',TPE:'TW',ALG:'DZ',ANG:'AO',BEN:'BJ',BOT:'BW',BUR:'BF',BDI:'BI',CMR:'CM',CPV:'CV',CAF:'CF',CHA:'TD',COM:'KM',CGO:'CG',COD:'CD',CIV:'CI',DJI:'DJ',EGY:'EG',GEQ:'GQ',ERI:'ER',SWZ:'SZ',ETH:'ET',GAB:'GA',GAM:'GM',GHA:'GH',GUI:'GN',GBS:'GW',KEN:'KE',LES:'LS',LBR:'LR',LBA:'LY',MAD:'MG',MAW:'MW',MLI:'ML',MTN:'MR',MRI:'MU',MAR:'MA',MOZ:'MZ',NAM:'NA',NIG:'NE',NGR:'NG',REU:'RE',RWA:'RW',STP:'ST',SEN:'SN',SEY:'SC',SLE:'SL',SOM:'SO',SSD:'SS',SUD:'SD',TAN:'TZ',TOG:'TG',TUN:'TN',UGA:'UG',ZAM:'ZM',ZIM:'ZW'};
 const NAMES = {ARM:'Armenia',AUT:'Austria',AZE:'Azerbaijan',BEL:'Belgium',BIH:'Bosnia and Herzegovina',BLR:'Belarus',BUL:'Bulgaria',CRO:'Croatia',CYP:'Cyprus',CZE:'Czechia',DEN:'Denmark',ESP:'Spain',EST:'Estonia',FIN:'Finland',FRA:'France',GBR:'Great Britain',GEO:'Georgia',GER:'Germany',GRE:'Greece',HUN:'Hungary',IRL:'Ireland',ISL:'Iceland',ISR:'Israel',ITA:'Italy',KOS:'Kosovo',LAT:'Latvia',LIE:'Liechtenstein',LTU:'Lithuania',LUX:'Luxembourg',MDA:'Moldova',MKD:'North Macedonia',MLT:'Malta',MNE:'Montenegro',NED:'Netherlands',NOR:'Norway',POL:'Poland',POR:'Portugal',ROU:'Romania',SLO:'Slovenia',SMR:'San Marino',SRB:'Serbia',SUI:'Switzerland',SVK:'Slovakia',SWE:'Sweden',TUR:'Türkiye',UKR:'Ukraine',ENG:'England',SCO:'Scotland',WAL:'Wales',FRO:'Faroe Islands',GIB:'Gibraltar',AND:'Andorra',MON:'Monaco',ALB:'Albania',RUS:'Russia',KAZ:'Kazakhstan',GRL:'Greenland',USA:'USA',CAN:'Canada',AUS:'Australia',IND:'India',JPN:'Japan',CHN:'China',KOR:'Korea',INA:'Indonesia',MAS:'Malaysia',THA:'Thailand',SGP:'Singapore',RSA:'South Africa',NZL:'New Zealand',BRA:'Brazil',PER:'Peru',HKG:'Hong Kong',TPE:'Chinese Taipei',ALG:"Algeria",ANG:"Angola",BEN:"Benin",BOT:"Botswana",BUR:"Burkina Faso",BDI:"Burundi",CMR:"Cameroon",CPV:"Cape Verde",CAF:"Central African Republic",CHA:"Chad",COM:"Comoros",CGO:"Congo",COD:"DR Congo",CIV:"Côte d'Ivoire",DJI:"Djibouti",EGY:"Egypt",GEQ:"Equatorial Guinea",ERI:"Eritrea",SWZ:"Eswatini",ETH:"Ethiopia",GAB:"Gabon",GAM:"Gambia",GHA:"Ghana",GUI:"Guinea",GBS:"Guinea-Bissau",KEN:"Kenya",LES:"Lesotho",LBR:"Liberia",LBA:"Libya",MAD:"Madagascar",MAW:"Malawi",MLI:"Mali",MTN:"Mauritania",MRI:"Mauritius",MAR:"Morocco",MOZ:"Mozambique",NAM:"Namibia",NIG:"Niger",NGR:"Nigeria",REU:"Réunion",RWA:"Rwanda",STP:"São Tomé and Príncipe",SEN:"Senegal",SEY:"Seychelles",SLE:"Sierra Leone",SOM:"Somalia",SSD:"South Sudan",SUD:"Sudan",TAN:"Tanzania",TOG:"Togo",TUN:"Tunisia",UGA:"Uganda",ZAM:"Zambia",ZIM:"Zimbabwe"};
 const SUBFLAG = {ENG:'\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}',SCO:'\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}',WAL:'\u{1F3F4}\u{E0067}\u{E0062}\u{E0077}\u{E006C}\u{E0073}\u{E007F}'};
@@ -378,12 +377,12 @@ function flagEmoji(cc){
   const iso=ISO[cc]; if(!iso) return '';
   return String.fromCodePoint(...[...iso].map(ch=>0x1F1E6+ch.charCodeAt(0)-65));
 }
-function flag(cc){ // emoji flag where the platform draws them, otherwise a small code badge
-  if(!cc) return '';
+function flag(cc){ // clubs have no flag
+  if(!cc||CLUBS) return '';
   if(flagsSupported()){ const e=flagEmoji(cc); if(e) return e; }
   return '<span class="cc">'+esc(cc)+'</span>';
 }
-function cname(cc){ return NAMES[cc]||cc||'—'; }
+function cname(cc){ return CLUBS[cc]||NAMES[cc]||cc||'—'; }
 
 /* ---------- storage ---------- */
 const store = {
@@ -443,13 +442,18 @@ function compact(raw, date){
   out.sort((x,y)=> x.t<y.t?-1:x.t>y.t?1:(x.court||99)-(y.court||99));
   return out;
 }
+let DJ=null; // one request for data.json per refresh, shared by all days
 async function fetchDay(date){
-  const url=CFG.api+'?tournamentCode='+CFG.code+'&date='+date+'&order=2&court=0';
-  const r=await fetch(url,{cache:'default'});
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const j=await r.json();
-  const arr=Array.isArray(j)?j:(j.results||j.matches||[]);
-  return compact(arr,date);
+  if(!DJ){ DJ=fetch(CFG.data+'?t='+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+    DJ.finally(()=>setTimeout(()=>{ DJ=null; },2000)).catch(()=>{}); }
+  const j=await DJ;
+  CLUBS=j.clubs||{}; store.set('clubs',CLUBS); D.drawList=j.draws||[]; store.set('draws',D.drawList); D.updated=j.updated||null;
+  const out=((j.days||{})[date]||[]).map(m=>{ m=Object.assign({},m);
+    if(m.court){ for(const k in CFG.venues){ if(CFG.venues[k].courts.includes(m.court)) m.v=k; }
+      if(!m.v){ const ks=Object.keys(CFG.venues); if(ks.length===1){ m.v=ks[0]; const cs=CFG.venues[m.v].courts; cs.push(m.court); cs.sort((x,y)=>x-y); } } }
+    return m; });
+  out.sort((x,y)=> x.t<y.t?-1:x.t>y.t?1:(x.court||99)-(y.court||99));
+  return out;
 }
 function rebuildIndex(){
   D.players=new Map(); D.countries=new Map(); D.byCode=new Map(); D.ver=(D.ver||0)+1; // ver invalidates the stats cache
@@ -488,6 +492,7 @@ async function load(opts){
   setDot(anyErr?'err':'ok'); updBtn(false); render({bg:true});
 }
 function bootFromCache(){
+  CLUBS=store.get('clubs',{})||{}; D.drawList=store.get('draws',null);
   for(const date of CFG.days){ const c=store.get('day:'+date); if(c&&c.m){ c.m.forEach(fixFlags); D.days[date]=c; } }
   rebuildIndex();
 }
@@ -501,7 +506,7 @@ function setDot(k){ const d=document.getElementById('dot'); d.className='dot '+k
 function updTxt(){
   const el=document.getElementById('updtxt');
   if(D.loading){ el.textContent='Updating…'; return; }
-  if(D.lastOk){ el.textContent=(D.lastErr?'Offline · ':'Updated ')+fmtClock(D.lastOk); }
+  if(D.lastOk){ el.textContent=(D.lastErr?'Offline · ':'Updated ')+(D.updated?fmtClock(Date.parse(D.updated)).slice(0,5):fmtClock(D.lastOk)); }
   else if(D.lastErr){ el.textContent='No connection'; }
   else el.textContent='…';
 }
@@ -516,7 +521,7 @@ const S = {
   cday: null, cfilter:'all',
   q:'', player:null, // player view inside Players tab
   from:null, fromY:0, // tab a player page was opened from (stats or countries), so Back returns there
-  sage:0, smore:{}, scat:{}, // Stats tab: age group filter, which lists are expanded, category per section (f2 final two, f4 final four)
+  sage:'', smore:{}, scat:{}, // Stats tab: age group filter, which lists are expanded, category per section (f2 final two, f4 final four)
   factI: Math.floor(Math.random()*1e6), // which "Did you know?" fact to show, picked once per visit
   pday: {}
 };
@@ -634,17 +639,17 @@ function render(opts){
   let html='';
   if(!publishedDays().length){
     if(D.loading) html='<div class="stack"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>';
-    else if(D.lastErr) html='<div class="banner err">Could not load the schedule from BWF ('+esc(String(D.lastErr.message||D.lastErr))+'). Check your connection. <button class="btn ghost" data-act="retry">Try again</button></div>';
-    else html='<div class="card empty">The BWF feed has no matches published for this tournament yet. <button class="btn ghost" data-act="retry">Check again</button></div>';
+    else if(D.lastErr) html='<div class="banner err">Could not load the schedule ('+esc(String(D.lastErr.message||D.lastErr))+'). Check your connection. <button class="btn ghost" data-act="retry">Try again</button></div>';
+    else html='<div class="card empty">No matches are published for this tournament yet. <button class="btn ghost" data-act="retry">Check again</button></div>';
     v.innerHTML=html; return;
   }
   const ctx=ctxNow();
   let warn='';
   if(D.lastErr&&D.lastOk) warn='<div class="banner">Live update failed. Showing data from '+fmtClock(D.lastOk)+'. <button class="btn ghost" data-act="retry">Retry</button></div>';
-  else if(D.lastErr&&!D.lastOk) warn='<div class="banner err">No connection to BWF right now. Showing the last saved schedule from this phone. <button class="btn ghost" data-act="retry">Retry</button></div>';
+  else if(D.lastErr&&!D.lastOk) warn='<div class="banner err">No connection right now. Showing the last saved schedule from this phone. <button class="btn ghost" data-act="retry">Retry</button></div>';
   if(S.draw) html=viewDraw(ctx);
   else if(S.tab==='me') html=viewMe(ctx); else if(S.tab==='players') html=viewPlayers(ctx); else if(S.tab==='countries') html=viewCountries(ctx); else if(S.tab==='draws') html=viewDraws(ctx); else if(S.tab==='stats') html=viewStatsPage(ctx); else if(S.tab==='usage') html=viewUsage(ctx); else html=viewVenues(ctx);
-  v.innerHTML=warn+html+'<p class="foot">Times are local '+esc(CFG.city)+' time. Data comes live from the BWF tournament feed (extranet-lv.bwfbadminton.com), the same source as bwfbadminton.com. Estimated start times are a guess based on how far behind schedule each venue is running right now. Next-round matches appear once the previous round has been played. Nothing here is official; always check the venue boards. <span id="usage">'+usageText()+'</span></p><p class="foot credit">Based on <a href="https://github.com/cvpcvp/esc26" target="_blank" rel="noopener">ESC26</a> by cvpcvp, used with permission.</p>';
+  v.innerHTML=warn+html+'<p class="foot">Times are local '+esc(CFG.city)+' time. Data is read from <a href="'+CFG.site+'/sport/tournament?id='+CFG.tid+'" target="_blank" rel="noopener">badminton.es</a> every 10 minutes, so it can be a few minutes behind. Estimated start times are a guess based on how far behind schedule each venue is running right now. Next-round matches appear once the previous round has been played. Nothing here is official; always check the venue boards. <span id="usage">'+usageText()+'</span></p><p class="foot credit">Based on <a href="https://github.com/cvpcvp/esc26" target="_blank" rel="noopener">ESC26</a> by cvpcvp, used with permission.</p>';
   if(S.draw){ const br=document.getElementById('bracket'); if(br&&keep&&S.draw.keepLeft!=null){ br.scrollLeft=S.draw.keepLeft; } }
   if(keep){ window.scrollTo(0,y); if(S.draw) afterDrawRender(); }
   else {
@@ -765,7 +770,7 @@ function viewCountries(ctx){
   const ordered=mine&&D.countries.has(mine)?[[mine,D.countries.get(mine)]].concat(cs.filter(c=>c[0]!==mine)):cs;
   let html='';
   if(!S.country||!D.countries.has(S.country)){
-    html+='<h2>Pick a country</h2><p class="small muted" style="margin:-4px 0 10px">All matches of that country, day by day, with venue and court. The number is how many player entries are in the schedule.</p>';
+    html+='<h2>Pick a club</h2><p class="small muted" style="margin:-4px 0 10px">All matches of that club, day by day, with venue and court. The number is how many player entries are in the schedule.</p>';
     html+='<div class="cgrid">'+ordered.map(([cc,n])=>'<button class="chip" data-act="country" data-cc="'+cc+'"><span class="flag" style="width:auto">'+(flag(cc)||'')+'</span> '+esc(cname(cc))+'<span class="n">'+Math.round(n)+'</span></button>').join('')+'</div>';
     return html;
   }
@@ -817,8 +822,8 @@ function viewVenues(ctx){
 // Counted: finished matches with both sides and a score. Walkovers are left out. A retired match counts for the players'
 // totals but not for the match records (longest, shortest). In doubles both partners get the minutes and points.
 const MEDAL_ROUNDS={SF:'SF', Final:'Final', F:'Final'};
-const CATS=['MS','BS','WS','GS','MD','BD','WD','GD','XD'];
-const CAT_NAMES={MS:"Men's singles",BS:"Boys' singles",WS:"Women's singles",GS:"Girls' singles",MD:"Men's doubles",BD:"Boys' doubles",WD:"Women's doubles",GD:"Girls' doubles",XD:'Mixed doubles'};
+const CATS=['IM','IF','DM','DF','DX'];
+const CAT_NAMES={IM:"Men's singles",IF:"Women's singles",DM:"Men's doubles",DF:"Women's doubles",DX:'Mixed doubles'};
 const TROPHY='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 6h3v1a3 3 0 0 1-3 3M7 6H4v1a3 3 0 0 0 3 3"/></svg>';
 const BOARDS=[
   {k:'min', t:'Minutes on court', tag:'Most minutes on court', u:'min'},
@@ -827,7 +832,7 @@ const BOARDS=[
   {k:'pts', t:'Points played', tag:'Most points played', u:''},
   {k:'g3', t:'Three-game matches', tag:'Most three-game matches', u:''}
 ];
-function ageOf(ev){ const m=/(\d+)\s*$/.exec(ev||''); return m?+m[1]:0; }
+function ageOf(ev){ const m=/\s([A-Z]\d?)$/.exec(ev||''); return m?m[1]:'Absoluto'; } // the level: A1, B2, D ...
 function isPlayed(m){ return (m.st==='F'||m.st==='O')&&!m.bye&&m.a.length>0&&m.b.length>0&&m.sc.length>0&&m.ss!=='Walkover'; }
 function isClean(m){ return isPlayed(m)&&m.ss==='Normal'&&m.du>0; }
 function ptsOf(m){ let s=0; for(const g of m.sc) s+=(+g[0]||0)+(+g[1]||0); return s; }
@@ -839,7 +844,7 @@ function kpi(v,l,s){ return '<div class="kpi"><div class="v">'+v+'</div><div cla
 let SC={ver:-1, map:{}};
 function stats(age){ // cached until the day data changes
   if(SC.ver!==D.ver) SC={ver:D.ver, map:{}};
-  const k=String(age||0); if(!SC.map[k]) SC.map[k]=computeStats(age||0);
+  const k=String(age||''); if(!SC.map[k]) SC.map[k]=computeStats(age||'');
   return SC.map[k];
 }
 function computeStats(age){
@@ -887,7 +892,7 @@ function computeStats(age){
   const upsets=seeded.filter(m=>(m.w===1&&!m.sa&&m.sb)||(m.w===2&&!m.sb&&m.sa)).sort((x,y)=>seedN(x.w===1?x.sb:x.sa)-seedN(y.w===1?y.sb:y.sa)||(x.t<y.t?1:-1));
   const countries=[...C.values()].sort((x,y)=>y.w-x.w||(y.w/(y.mt||1))-(x.w/(x.mt||1))||x.c.localeCompare(y.c));
   const crank=new Map(); { let prev=null,pos=0; countries.forEach((c,i)=>{ if(c.w!==prev){ pos=i+1; prev=c.w; } crank.set(c.c,pos); }); }
-  const ages=[...AG.values()].sort((x,y)=>x.age-y.age);
+  const ages=[...AG.values()].sort((x,y)=>lvlCmp(x.age,y.age));
   // medals: both semifinal losers get bronze, the final gives gold and silver (walkovers count here)
   const medals=new Map(), pmedals=new Map();
   for(const m of all){
@@ -910,7 +915,7 @@ function computeStats(age){
       const e=M.get(m.ev)||{ev:m.ev,sides:[],won:[]}; const done=m.st==='F'||m.st==='O';
       [m.a,m.b].forEach((t,s)=>{ if(t.length){ e.sides.push(t); e.won.push(done&&m.w===s+1); } }); M.set(m.ev,e);
     }
-    return [...M.values()].sort((x,y)=>ageOf(x.ev)-ageOf(y.ev)||CATS.indexOf(x.ev.slice(0,2))-CATS.indexOf(y.ev.slice(0,2))); };
+    return [...M.values()].sort((x,y)=>lvlCmp(ageOf(x.ev),ageOf(y.ev))||CATS.indexOf(x.ev.slice(0,2))-CATS.indexOf(y.ev.slice(0,2))); };
   const final4=byRound('SF'), final2=byRound('Final');
   // tags: players who lead a board (only when five or fewer share the top spot), record holders and medal winners
   const tags=new Map(); const addTag=(pid,t,v)=>{ const l=tags.get(pid)||[]; if(!l.some(x=>x.t===t)) l.push({t,v}); tags.set(pid,l); };
@@ -945,6 +950,7 @@ const MST_API='https://extranet-lv.bwfbadminton.com/api/match-center/vue-match-s
 const MST={}, MSTbusy={}; let mstTimer=null;
 function matchRun(m){ // [run of side a, run of side b]; undefined while loading; null when BWF has no numbers
   const k=m.n; if(!k) return null;
+  return null;
   if(k in MST) return MST[k];
   const c=store.get('mst:'+k); if(Array.isArray(c)){ MST[k]=c; return c; }
   if(!MSTbusy[k]){
@@ -972,7 +978,7 @@ function playerStatsCard(p){ // the player's own numbers, on the Me page and on 
     kpi(fmtN(e.pts),'Points played',fmtN(e.pw)+' won')+
     kpi(e.gw+'–'+e.gl,'Games won–lost',e.g3?e.g3+' went to three':'')+
     kpi(e.long+'<small>min</small>','Longest match','')+
-    kpi(known?String(run):(pending?'…':'–'),'Longest run','points in a row')+
+    
   '</div></div>';
 }
 function lbRow(p,rk,val,unit,sub){
@@ -986,7 +992,7 @@ function countryStatsCard(cc){ // shown on a country's page
   const med=st.medalTable.find(x=>x.c===cc);
   let html='<div class="card" style="margin-bottom:12px"><div class="shead"><span class="ev">Tournament so far</span><button class="btn ghost" data-act="tab" data-tab="stats" style="padding:0">All stats ›</button></div><div class="kpis">'+
     kpi(e.w+'–'+e.l,'Won–lost',pct+'% won')+
-    kpi(ordinal(st.crank.get(cc)),'Most wins','of '+st.countriesN+' countries')+
+    kpi(ordinal(st.crank.get(cc)),'Most wins','of '+st.countriesN+' clubs')+
     kpi(fmtN(e.min/60)+'<small>h</small>','On court',fmtN(e.pl.size)+' players')+'</div>';
   if(e.same) html+='<p class="tiny muted" style="margin:8px 0 0">'+e.same+' match'+(e.same===1?'':'es')+' with '+esc(cname(cc))+' on both sides '+(e.same===1?'is':'are')+' not counted in won–lost.</p>';
   if(med) html+='<div class="ev" style="margin:12px 0 6px">Medals</div><div class="medals"><span>'+med.g+' gold</span><span>'+med.s+' silver</span><span>'+med.b+' bronze</span></div>';
@@ -999,11 +1005,11 @@ function recRow(v,sub,m){
   return '<div class="rec"><div class="rv">'+v+'<small>'+esc(sub)+'</small></div><div class="grow"><div class="ev">'+esc(m.ev)+' · '+esc(m.rd)+' · '+esc(dayLabel(m.d))+'</div><div class="who">'+(m.w===1?'<b>'+a+'</b>':a)+' <span class="muted">v</span> '+(m.w===2?'<b>'+b+'</b>':b)+'</div><div class="scr">'+esc(scoreTxt(m))+(m.du?' · '+m.du+' min':'')+'</div></div></div>';
 }
 function viewStatsPage(){ // the Stats tab
-  const ages=[...new Set(allMatches().map(m=>ageOf(m.ev)).filter(Boolean))].sort((a,b)=>a-b);
-  const age=ages.includes(S.sage)?S.sage:0;
+  const ages=[...new Set(allMatches().map(m=>ageOf(m.ev)).filter(Boolean))].sort(lvlCmp);
+  const age=ages.length>1&&ages.includes(S.sage)?S.sage:'';
   const st=stats(age);
   let html='<h2>Stats</h2>';
-  html+='<div class="chips">'+[0].concat(ages).map(a=>'<button class="chip'+(a===age?' on':'')+'" data-act="sage" data-a="'+a+'">'+(a?ageLbl(a):'All ages')+'</button>').join('')+'</div>';
+  html+='<div class="chips">'+(ages.length>1?[''].concat(ages):['']).map(a=>'<button class="chip'+(a===age?' on':'')+'" data-act="sage" data-a="'+a+'">'+(a?ageLbl(a):'All levels')+'</button>').join('')+'</div>';
   if(!st.played.length) return html+'<div class="card empty">No finished matches'+(age?' in the '+ageLbl(age)+' events':'')+' yet.</div>';
   if(S.me){ const e=st.P.get(S.me.i); if(e){ const r=st.rank.min.get(e.i);
     html+='<button class="next" data-act="tab" data-tab="me" style="display:block;width:100%;text-align:left;border:0;margin-bottom:12px"><b>You'+(age?' in '+ageLbl(age):'')+':</b> '+fmtN(e.min)+' min on court (#'+fmtN(r)+' of '+fmtN(st.players.length)+'), '+e.w+' win'+(e.w===1?'':'s')+', '+fmtN(e.pts)+' points played ›</button>'; } }
@@ -1011,7 +1017,7 @@ function viewStatsPage(){ // the Stats tab
     kpi(fmtN(st.played.length),'Matches played',st.clean?Math.round(100*st.three/st.clean)+'% went to three games':'')+
     kpi(fmtN(st.min/60)+'<small>h</small>','Hours of play','all courts added up')+
     kpi(fmtN(st.points),'Points played','')+
-    kpi(fmtN(st.players.length),'Players',st.countriesN+' countries')+'</div></div>';
+    kpi(fmtN(st.players.length),'Players',st.countriesN+' clubs')+'</div></div>';
   if(st.medalTable.length) html+=medalHtml(st)+pmedalHtml(st);
   html+=roundHtml(st,'f2')+roundHtml(st,'f4');
   html+='<h2>Leaders</h2>';
@@ -1030,17 +1036,17 @@ function viewStatsPage(){ // the Stats tab
     html+='<h2>Upsets</h2><div class="card"><p class="small" style="margin:0 0 4px">Unseeded players beat a seed <b>'+st.upsets.length+'</b> time'+(st.upsets.length===1?'':'s')+' in '+fmtN(st.seeded)+' matches with a seed.</p>'+st.upsets.slice(0,5).map(m=>recRow('['+esc(m.w===1?m.sb:m.sa)+']','seed beaten',m)).join('')+'</div>';
   }
   if(!age&&st.ages.length>1){
-    html+='<h2>Age groups</h2><div class="card"><div class="tscroll"><table class="stbl"><thead><tr><th>Age</th><th>Matches</th><th>Avg min</th><th>Points per min</th><th>3 games</th></tr></thead><tbody>'+st.ages.map(g=>'<tr class="tap" data-act="sage" data-a="'+g.age+'"><td><b>'+ageLbl(g.age)+'</b></td><td>'+fmtN(g.n)+'</td><td>'+(g.dn?(g.min/g.dn).toFixed(1):'–')+'</td><td>'+(g.min?(g.pts/g.min).toFixed(2):'–')+'</td><td>'+Math.round(100*g.g3/g.n)+'%</td></tr>').join('')+'</tbody></table></div><p class="tiny muted" style="margin:8px 0 0">Avg min is the average match length. Points per minute is a rough measure of rally length: more points per minute means shorter rallies. Tap an age group to see its own leaders.</p></div>';
+    html+='<h2>Levels</h2><div class="card"><div class="tscroll"><table class="stbl"><thead><tr><th>Level</th><th>Matches</th><th>Avg min</th><th>Points per min</th><th>3 games</th></tr></thead><tbody>'+st.ages.map(g=>'<tr class="tap" data-act="sage" data-a="'+g.age+'"><td><b>'+ageLbl(g.age)+'</b></td><td>'+fmtN(g.n)+'</td><td>'+(g.dn?(g.min/g.dn).toFixed(1):'–')+'</td><td>'+(g.min?(g.pts/g.min).toFixed(2):'–')+'</td><td>'+Math.round(100*g.g3/g.n)+'%</td></tr>').join('')+'</tbody></table></div><p class="tiny muted" style="margin:8px 0 0">Avg min is the average match length. Points per minute is a rough measure of rally length: more points per minute means shorter rallies. Tap an age group to see its own leaders.</p></div>';
   }
   const cs=st.countries; const nC=S.smore.cty?cs.length:10;
-  html+='<h2>Countries</h2><div class="card"><table class="stbl"><thead><tr><th>Country</th><th>Won</th><th>Lost</th><th>Win %</th></tr></thead><tbody>'+cs.slice(0,nC).map(c=>'<tr class="tap'+(S.me&&S.me.c===c.c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(c.c)+'"><td><span class="cn">'+st.crank.get(c.c)+'. <span class="flag" style="width:auto;font-size:15px">'+(flag(c.c)||'')+'</span>'+esc(cname(c.c))+'</span></td><td>'+c.w+'</td><td>'+c.l+'</td><td>'+(c.mt?Math.round(100*c.w/c.mt)+'%':'–')+'</td></tr>').join('')+'</tbody></table>'+(cs.length>10?'<button class="btn ghost more" data-act="smore" data-k="cty">'+(S.smore.cty?'Show top 10':'Show all '+cs.length)+'</button>':'')+'<p class="tiny muted" style="margin:8px 0 0">Matches with the same country on both sides, for example Denmark v Denmark, are left out of won, lost and win %.</p></div>';
+  html+='<h2>Clubs</h2><div class="card"><table class="stbl"><thead><tr><th>Club</th><th>Won</th><th>Lost</th><th>Win %</th></tr></thead><tbody>'+cs.slice(0,nC).map(c=>'<tr class="tap'+(S.me&&S.me.c===c.c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(c.c)+'"><td><span class="cn">'+st.crank.get(c.c)+'. <span class="flag" style="width:auto;font-size:15px">'+(flag(c.c)||'')+'</span>'+esc(cname(c.c))+'</span></td><td>'+c.w+'</td><td>'+c.l+'</td><td>'+(c.mt?Math.round(100*c.w/c.mt)+'%':'–')+'</td></tr>').join('')+'</tbody></table>'+(cs.length>10?'<button class="btn ghost more" data-act="smore" data-k="cty">'+(S.smore.cty?'Show top 10':'Show all '+cs.length)+'</button>':'')+'<p class="tiny muted" style="margin:8px 0 0">Matches with the same club on both sides are left out of won, lost and win %.</p></div>';
   html+=partHtml(st);
   if(!st.medalTable.length) html+='<h2>Medals</h2><div class="card small muted">The medal tables fill in as the semifinals and finals are played. Both semifinal losers get bronze.</div>';
-  html+='<p class="small muted" style="margin-top:14px">Worked out on this phone from the same BWF feed as the rest of the site. Only finished matches count and walkovers are left out. A retired match counts for the players’ totals but not for the match records. In doubles both partners get the minutes and points. Leaders get a tag on their player page.</p>';
+  html+='<p class="small muted" style="margin-top:14px">Worked out on this phone from the same badminton.es data as the rest of the site. Only finished matches count and walkovers are left out. A retired match counts for the players’ totals but not for the match records. In doubles both partners get the minutes and points. Leaders get a tag on their player page.</p>';
   return html;
 }
 function medalHtml(st){
-  return '<h2>Medals</h2><div class="card"><table class="stbl"><thead><tr><th>Country</th><th>Gold</th><th>Silver</th><th>Bronze</th></tr></thead><tbody>'+st.medalTable.map(c=>'<tr class="tap'+(S.me&&S.me.c===c.c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(c.c)+'"><td><span class="cn"><span class="flag" style="width:auto;font-size:15px">'+(flag(c.c)||'')+'</span>'+esc(cname(c.c))+'</span></td><td>'+c.g+'</td><td>'+c.s+'</td><td>'+c.b+'</td></tr>').join('')+'</tbody></table><p class="tiny muted" style="margin:8px 0 0">Counted per event: a pair from two countries gives both countries a medal.</p></div>';
+  return '<h2>Medals</h2><div class="card"><table class="stbl"><thead><tr><th>Club</th><th>Gold</th><th>Silver</th><th>Bronze</th></tr></thead><tbody>'+st.medalTable.map(c=>'<tr class="tap'+(S.me&&S.me.c===c.c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(c.c)+'"><td><span class="cn"><span class="flag" style="width:auto;font-size:15px">'+(flag(c.c)||'')+'</span>'+esc(cname(c.c))+'</span></td><td>'+c.g+'</td><td>'+c.s+'</td><td>'+c.b+'</td></tr>').join('')+'</tbody></table><p class="tiny muted" style="margin:8px 0 0">Counted per event: a pair from two clubs gives both clubs a medal.</p></div>';
 }
 const MEDAL_EMOJI={g:'\u{1F947}',s:'\u{1F948}',b:'\u{1F949}'}, MEDAL_WORD={g:'Gold',s:'Silver',b:'Bronze'};
 function rankRows(arr,key){ let prev=null,pos=0; return arr.map((o,i)=>{ const k=key(o); if(k!==prev){ pos=i+1; prev=k; } return pos; }); }
@@ -1056,9 +1062,9 @@ function pmedalHtml(st){ // medals per player, gold counts most
 function f4Flags(t){ return t.map(p=>'<span class="flag" title="'+esc(cname(p.c))+'">'+(flag(p.c)||'')+'</span>').join(''); }
 function roundHtml(st,k){ // which countries have the most players in the finals (f2) or the semifinals (f4)
   const f2=k==='f2', list=f2?st.final2:st.final4; if(!list.length) return '';
-  const cats=CATS.filter(c=>list.some(e=>e.ev.startsWith(c+' ')));
+  const cats=CATS.filter(c=>list.some(e=>e.ev===c||e.ev.startsWith(c+' ')));
   const cat=cats.includes(S.scat[k])?S.scat[k]:'';
-  const evs=list.filter(e=>!cat||e.ev.startsWith(cat+' '));
+  const evs=list.filter(e=>!cat||e.ev===cat||e.ev.startsWith(cat+' '));
   const C=new Map();
   for(const e of evs) for(const t of e.sides) for(const p of t){ if(!p.c) continue; const o=C.get(p.c)||{c:p.c,n:0,ev:new Set()}; o.n++; o.ev.add(e.ev); C.set(p.c,o); }
   const rows=[...C.values()].sort((x,y)=>y.n-x.n||y.ev.size-x.ev.size||cname(x.c).localeCompare(cname(y.c)));
@@ -1066,9 +1072,9 @@ function roundHtml(st,k){ // which countries have the most players in the finals
   const nR=S.smore[k]?rows.length:10;
   ensureDrawList();
   const me=S.me?S.me.i:'';
-  let html='<h2>'+(f2?'Final two':'Final four')+'</h2><div class="card"><p class="small" style="margin:0 0 8px">Players in the '+(f2?'finals':'semifinals')+', counted per country'+(st.age?' in the '+ageLbl(st.age)+' events':'')+'.</p>';
+  let html='<h2>'+(f2?'Final two':'Final four')+'</h2><div class="card"><p class="small" style="margin:0 0 8px">Players in the '+(f2?'finals':'semifinals')+', counted per club'+(st.age?' in the '+ageLbl(st.age)+' events':'')+'.</p>';
   if(cats.length>1) html+='<div class="chips" style="padding-bottom:10px">'+[''].concat(cats).map(c=>'<button class="chip'+(c===cat?' on':'')+'" data-act="scat" data-k="'+k+'" data-c="'+c+'">'+(c||'All')+'</button>').join('')+'</div>';
-  html+='<table class="stbl"><thead><tr><th>Country</th><th>Players</th><th>Events</th></tr></thead><tbody>'+rows.slice(0,nR).map((o,i)=>'<tr class="tap'+(S.me&&S.me.c===o.c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(o.c)+'"><td><span class="cn">'+rk[i]+'. <span class="flag" style="width:auto;font-size:15px">'+(flag(o.c)||'')+'</span>'+esc(cname(o.c))+'</span></td><td>'+o.n+'</td><td>'+o.ev.size+'</td></tr>').join('')+'</tbody></table>'+moreBtn(k,rows.length,10,'countries');
+  html+='<table class="stbl"><thead><tr><th>Club</th><th>Players</th><th>Events</th></tr></thead><tbody>'+rows.slice(0,nR).map((o,i)=>'<tr class="tap'+(S.me&&S.me.c===o.c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(o.c)+'"><td><span class="cn">'+rk[i]+'. <span class="flag" style="width:auto;font-size:15px">'+(flag(o.c)||'')+'</span>'+esc(cname(o.c))+'</span></td><td>'+o.n+'</td><td>'+o.ev.size+'</td></tr>').join('')+'</tbody></table>'+moreBtn(k,rows.length,10,'countries');
   const kev=k+'ev', open=S.smore[kev]||evs.length<=6;
   html+='<div class="ev" style="margin:14px 0 4px">'+(cat?esc(CAT_NAMES[cat]):'Each event')+' · '+evs.length+' event'+(evs.length===1?'':'s')+'</div>';
   if(open) html+='<div class="f4list">'+evs.map(e=>{ const dr=drawFor(e.ev); const inner='<span class="f4ev">'+esc(e.ev)+'</span><span class="f4s">'+e.sides.map((t,i)=>'<span class="f4side">'+(f2&&e.won[i]?'<span class="mdl">'+MEDAL_EMOJI.g+'</span>':'')+f4Flags(t)+'</span>').join('')+'</span>'+(dr?'<span class="muted">›</span>':''); return dr?'<button class="f4row" data-act="draw" data-id="'+dr.id+'" data-pid="'+esc(me)+'" data-from="stats">'+inner+'</button>':'<div class="f4row">'+inner+'</div>'; }).join('')+'</div>';
@@ -1080,7 +1086,7 @@ function partHtml(st){ // participants per country: players who have played at l
   const rows=[...C.entries()].sort((x,y)=>y[1]-x[1]||cname(x[0]).localeCompare(cname(y[0])));
   if(!rows.length) return '';
   const rk=rankRows(rows,r=>r[1]); const top=rows[0][1]; const nR=S.smore.part?rows.length:10;
-  return '<h2>Participants</h2><div class="card"><table class="stbl"><thead><tr><th>Country</th><th>Players</th><th></th></tr></thead><tbody>'+rows.slice(0,nR).map(([c,n],i)=>'<tr class="tap'+(S.me&&S.me.c===c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(c)+'"><td><span class="cn">'+rk[i]+'. <span class="flag" style="width:auto;font-size:15px">'+(flag(c)||'')+'</span>'+esc(cname(c))+'</span></td><td>'+n+'</td><td style="width:34%"><span class="pbar" style="width:'+Math.max(4,Math.round(100*n/top))+'%"></span></td></tr>').join('')+'</tbody></table>'+moreBtn('part',rows.length,10,'countries')+'<p class="tiny muted" style="margin:8px 0 0">'+fmtN(st.players.length)+' players from '+rows.length+' countries'+(st.age?' in the '+ageLbl(st.age)+' events':'')+', counting everyone who has played at least one match.</p></div>';
+  return '<h2>Participants</h2><div class="card"><table class="stbl"><thead><tr><th>Club</th><th>Players</th><th></th></tr></thead><tbody>'+rows.slice(0,nR).map(([c,n],i)=>'<tr class="tap'+(S.me&&S.me.c===c?' hi':'')+'" data-act="opencountry" data-cc="'+esc(c)+'"><td><span class="cn">'+rk[i]+'. <span class="flag" style="width:auto;font-size:15px">'+(flag(c)||'')+'</span>'+esc(cname(c))+'</span></td><td>'+n+'</td><td style="width:34%"><span class="pbar" style="width:'+Math.max(4,Math.round(100*n/top))+'%"></span></td></tr>').join('')+'</tbody></table>'+moreBtn('part',rows.length,10,'countries')+'<p class="tiny muted" style="margin:8px 0 0">'+fmtN(st.players.length)+' players from '+rows.length+' clubs'+(st.age?' in the '+ageLbl(st.age)+' events':'')+', counting everyone who has played at least one match.</p></div>';
 }
 
 
@@ -1088,18 +1094,13 @@ function partHtml(st){ // participants per country: players who have played at l
 const DRAW_API='https://extranet-lv.bwfbadminton.com/api/';
 const SECTION=16; // first-round slots per swipeable section
 const DRAW_V=2; // bump when the compact draw format changes so old cached draws are ignored
-async function loadDrawList(){
-  if(D.drawList) return D.drawList;
-  const c=store.get('drawlist'); if(c&&c.at&&Date.now()-c.at<6*3600000&&c.list){ D.drawList=c.list; return c.list; }
-  const r=await fetch(DRAW_API+'vue-tournament-draws?tmtTab=draw&tmtId='+CFG.tmtId,{cache:'default'}); if(!r.ok) throw new Error('HTTP '+r.status);
-  const j=await r.json(); const list=(j.results||[]).map(d=>({id:String(d.value),name:d.text,size:d.size,slug:d.slug,type:d.type}));
-  D.drawList=list; store.set('drawlist',{at:Date.now(),list}); return list;
-}
+async function loadDrawList(){ return D.drawList||[]; }
 function ensureDrawList(){ // loads the draw list once, re-renders when it lands
   if(D.drawList||D.drawListBusy) return;
   D.drawListBusy=loadDrawList().then(()=>{ D.drawListBusy=null; render({bg:true}); }).catch(()=>{ D.drawListBusy=null; });
 }
 function drawFor(eventName){ return (D.drawList||[]).find(d=>d.name===eventName)||null; }
+function drawUrl(id){ return CFG.site+'/sport/draw.aspx?id='+CFG.tid+'&draw='+encodeURIComponent(id); }
 function compactDraw(res){
   const team=t=>(t&&t.players||[]).map(p=>({i:String(p.id), n:fixName(p.nameDisplay||''), c:p.countryCode||t.countryCode||''}));
   const isBye=t=>!!(t&&(t.linkName==='Bye'||t.teamName==='Bye'));
@@ -1245,13 +1246,12 @@ function viewDraws(ctx){ // the Draws tab: pick an event
   if(!D.drawList){ html+='<div class="stack"><div class="skel"></div></div>'; return html; }
   const me=S.me?playerFromIndex(S.me):null;
   if(me&&me.ev&&me.ev.size){ const bs=[...me.ev].map(ev=>{ const dr=drawFor(ev); return dr?'<button class="btn primary" data-act="draw" data-id="'+dr.id+'" data-pid="'+me.i+'" data-from="list">'+esc(ev)+'</button>':''; }).join(''); if(bs) html+='<div class="card"><div class="ev" style="margin-bottom:8px">Your events</div><div class="row" style="flex-wrap:wrap">'+bs+'</div></div>'; }
-  const groups=[['MS',"Men's singles"],['WS',"Women's singles"],['MD',"Men's doubles"],['WD',"Women's doubles"],['XD','Mixed doubles']];
-  for(const [pre,label] of groups){
-    const ds=D.drawList.filter(x=>x.name.startsWith(pre+' ')).sort((a,b)=>(+a.name.slice(3))-(+b.name.slice(3)));
+  for(const pre of CATS){
+    const ds=D.drawList.filter(x=>x.name===pre||x.name.startsWith(pre+' ')).sort((a,b)=>lvlCmp(ageOf(a.name.replace(/ - .*$/,'')),ageOf(b.name.replace(/ - .*$/,'')))||a.name.localeCompare(b.name));
     if(!ds.length) continue;
-    html+='<div class="ev" style="margin:14px 0 6px">'+label+'</div><div class="cgrid">'+ds.map(x=>'<button class="chip" data-act="draw" data-id="'+x.id+'" data-pid="'+(me?me.i:'')+'" data-from="list">'+esc(x.name.slice(3))+'<span class="n">'+(x.size||'')+'</span></button>').join('')+'</div>';
+    html+='<div class="ev" style="margin:14px 0 6px">'+esc(CAT_NAMES[pre])+'</div><div class="cgrid">'+ds.map(x=>'<button class="chip" data-act="draw" data-id="'+x.id+'" data-pid="'+(me?me.i:'')+'" data-from="list">'+esc(x.name)+'<span class="n">'+(x.size||'')+'</span></button>').join('')+'</div>';
   }
-  html+='<p class="small muted" style="margin-top:14px">Numbers are the draw size. Byes are shown in the first round.</p>';
+  html+='<p class="small muted" style="margin-top:14px">Numbers are the draw size. Draws open on badminton.es.</p>';
   return html;
 }
 /* ---------- hash / sharing ---------- */
@@ -1271,9 +1271,9 @@ function updHash(){
 function readHash(){
   const h=(location.hash||'').slice(1);
   if(!h) return;
-  const dm=/^d=(\d+)(?:-(\d+))?$/.exec(h); if(dm){ S.tab='draws'; S.draw={id:dm[1], pid:dm[2]||null, from:'list', part:null}; return; }
+  
   const m=/^p=(\d+)$/.exec(h); if(m){ S.tab='players'; S.pendingPlayer=m[1]; S.draw=null; S.from=null; return; }
-  const c=/^c=([A-Z]{3})$/.exec(h); if(c){ S.tab='countries'; S.country=c[1]; S.draw=null; return; }
+  const c=/^c=([^&]+)$/.exec(h); if(c){ S.tab='countries'; S.country=c[1]; S.draw=null; return; }
   const tabs={venues:1,players:1,me:1,draws:1,countries:1,stats:1,usage:1};
   if(tabs[h]){ S.tab=h; S.draw=null; }
 }
@@ -1310,13 +1310,13 @@ document.getElementById('view').addEventListener('click',e=>{
   else if(act==='open'){ const p=pick(); if(p){ if(S.tab==='stats'||S.tab==='countries'){ S.from=S.tab; S.fromY=window.scrollY||0; } else if(S.tab!=='players') S.from=null; S.player=p; S.tab='players'; store.set('tab','players'); render(); } }
   else if(act==='back'){ if(S.from){ const y=S.fromY; S.tab=S.from; store.set('tab',S.tab); S.player=null; S.from=null; render(); window.scrollTo(0,y); } else { S.player=null; S.focusSearch='q-players'; render(); } }
   else if(act==='tab'){ S.tab=b.dataset.tab; store.set('tab',S.tab); S.q=''; S.draw=null; S.from=null; render(); }
-  else if(act==='sage'){ S.sage=+b.dataset.a||0; render(); }
+  else if(act==='sage'){ S.sage=b.dataset.a||''; render(); }
   else if(act==='smore'){ const k=b.dataset.k; S.smore[k]=!S.smore[k]; render({keepScroll:true}); }
   else if(act==='scat'){ S.scat[b.dataset.k||'f4']=b.dataset.c||''; render({keepScroll:true}); }
   else if(act==='opencountry'){ S.country=b.dataset.cc; store.set('country',S.country); S.cday=null; S.cfilter='all'; S.tab='countries'; store.set('tab',S.tab); S.from=null; render(); }
   else if(act==='follow'){ const p=pick(); if(!p) return; if(isFollowed(p.i)) S.follow=S.follow.filter(x=>x.i!==p.i); else S.follow.push(p); store.set('follow',S.follow); render({keepScroll:true}); }
   else if(act==='share'){ share(id,b.dataset.name||''); }
-  else if(act==='draw'){ if(b.dataset.from==='stats') S.statsY=window.scrollY||0; S.draw={id:b.dataset.id, pid:b.dataset.pid||null, from:b.dataset.from||'list', part:null}; S.drawErr=null; store.set('lastdraw',b.dataset.id); render(); }
+  else if(act==='draw'){ window.open(drawUrl(b.dataset.id),'_blank','noopener'); }
   else if(act==='drawback'){ const from=S.draw&&S.draw.from; S.draw=null; if(from==='list'){ S.tab='draws'; store.set('tab',S.tab); } if(from==='stats'){ S.tab='stats'; render(); window.scrollTo(0,S.statsY||0); } else render(); }
   else if(act==='drawpart'){ if(S.draw){ S.draw.part=b.dataset.part; S.draw.scrollCol=0; S.draw.keepLeft=null; render(); } }
   else if(act==='drawcol'){ const br=document.getElementById('bracket'); if(br&&br.__toCol) br.__toCol(+b.dataset.i,true); }
@@ -1373,6 +1373,8 @@ bootFromCache();
 resolvePending();
 render();
 load().then(()=>{ resolvePending(); render({bg:true}); });
+// the days come from data.json, so a new tournament only needs config.json
+fetch(CFG.data+'?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{ if(!j) return; const ds=Object.keys(j.days||{}).sort(); if(ds.length&&ds.join()!==CFG.days.join()){ CFG.days=ds; load({force:true}).then(()=>render({bg:true})); } }).catch(()=>{});
 track();
 })();
 </script>

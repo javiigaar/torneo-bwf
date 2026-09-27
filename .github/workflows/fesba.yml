@@ -1,0 +1,37 @@
+name: badminton.es data
+
+# Reads the tournament in fesba/config.json from badminton.es and commits fesba/data.json.
+# Every 10 minutes from 06:00 to 21:59 UTC (08:00-23:59 in Madrid in summer time); the script
+# itself does nothing outside the tournament days. "Run workflow" in the Actions tab forces a run.
+on:
+  schedule:
+    - cron: '*/10 6-21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fesba-data
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4
+      - run: python fesba/scrape.py ${{ github.event_name == 'workflow_dispatch' && '--force' || '' }}
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fesba/data.json
+          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          git commit -m "Actualiza datos del torneo"
+          git pull --rebase origin main
+          git push

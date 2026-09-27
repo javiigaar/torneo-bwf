@@ -139,6 +139,63 @@ def parse_day(soup, date):
     return out
 
 
+def players_of(row):
+    ps, seed = [], ''
+    for a in row.select('a[data-player-id]'):
+        n, sd = split_seed(txt(a))
+        ps.append({'i': a['data-player-id'], 'n': n, 'c': a.get('data-club-id', '')})
+        seed = seed or sd
+    return ps, seed
+
+
+def parse_bracket(soup):
+    """A knock-out draw in the format the page draws: one column per round, matches top to bottom."""
+    heads = [round_name(txt(h), '') for h in soup.select('.js-subheading')]
+    out = []
+    for c, slide in enumerate(soup.select('swiper-slide')):
+        for r, m in enumerate(slide.select('.match')):
+            rows = m.select('.match__row')[:2]
+            sides, seeds, byes, won = [], [], [], 0
+            for k, row in enumerate(rows):
+                ps, sd = players_of(row)
+                sides.append(ps); seeds.append(sd)
+                byes.append(not ps and txt(row.select_one('.match__row-title') or row).strip().lower() == 'bye')
+                if 'has-won' in (row.get('class') or []):
+                    won = k + 1
+            while len(sides) < 2:
+                sides.append([]); seeds.append(''); byes.append(False)
+            sc = []
+            for g in m.select('.match__result .points'):
+                cc = [x.get_text(strip=True) for x in g.select('.points__cell')]
+                if len(cc) == 2 and all(x.isdigit() for x in cc):
+                    sc.append([int(cc[0]), int(cc[1])])
+            foot = txt(m.select_one('.match__footer'))
+            tm = re.search(r'(\d{2})/(\d{2})/(\d{4})\s+(\d{1,2}):(\d{2})', foot)
+            t = '%s-%s-%s %02d:%s' % (tm.group(3), tm.group(2), tm.group(1), int(tm.group(4)), tm.group(5)) if tm else ''
+            msg = txt(m.select_one('.match__message')).lower()
+            ss = 'Retired' if 'retir' in msg else 'Walkover' if msg and any(w in msg for w in ('walkover', 'no match', 'no hay', 'cancel', 'no present')) else 'Normal'
+            out.append({'c': c, 'r': r, 'n': '', 'rd': heads[c] if c < len(heads) else '', 't': t, 'st': 'F' if won else 'N',
+                        'w': won, 'a': sides[0], 'b': sides[1], 'ab': byes[0], 'bb': byes[1], 'sa': seeds[0], 'sb': seeds[1],
+                        'sc': sc, 'ss': ss})
+    cols = max((m['c'] for m in out), default=-1) + 1
+    return {'m': out, 'cols': cols, 'rounds': {str(i): h for i, h in enumerate(heads)},
+            'n0': sum(1 for m in out if m['c'] == 0), 'v': 2}
+
+
+def link_brackets(days, brackets):
+    """Gives a match in the day list and the same match in its bracket one shared code, so the bracket shows times and courts."""
+    idx = {}
+    for did, b in brackets.items():
+        for m in b['m']:
+            if m['a'] and m['b']:
+                idx[(did, tuple(sorted(p['i'] for p in m['a'] + m['b'])))] = m
+    for ms in days.values():
+        for m in ms:
+            bm = idx.get((m['did'], tuple(sorted(p['i'] for p in m['a'] + m['b']))))
+            if bm:
+                m['n'] = bm['n'] = '%s:%d:%d' % (m['did'], bm['c'], bm['r'])
+
+
 def parse_clubs(soup):
     clubs = {}
     for a in soup.select('a[href*="club.aspx"]'):
@@ -180,6 +237,15 @@ def main():
         soup = get(f'{BASE}/tournament/{TID.lower()}/matches/{d.replace("-", "")}', post=True)
         data['days'][d] = parse_day(soup, d)
         print(d, len(data['days'][d]), 'matches')
+    brackets = {}
+    for dr in data['draws']:
+        t = dr['type'].lower()
+        if 'liguilla' in t or 'round robin' in t or 'grupo' in t:
+            continue  # group tables are worked out on the page from the matches
+        soup = get(f'{BASE}/tournament/{TID.lower()}/Draw/{dr["id"]}/GetDrawContent?tabindex=1', post=True)
+        brackets[dr['id']] = parse_bracket(soup)
+    link_brackets(data['days'], brackets)
+    data['brackets'] = brackets
     out = HERE / 'data.json'
     old = json.loads(out.read_text(encoding='utf-8')) if out.exists() else None
     if old and {k: v for k, v in old.items() if k != 'updated'} == {k: v for k, v in data.items() if k != 'updated'}:

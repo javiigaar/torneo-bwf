@@ -447,7 +447,7 @@ async function fetchDay(date){
   if(!DJ){ DJ=fetch(CFG.data+'?t='+Date.now(),{cache:'no-store'}).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
     DJ.finally(()=>setTimeout(()=>{ DJ=null; },2000)).catch(()=>{}); }
   const j=await DJ;
-  CLUBS=j.clubs||{}; store.set('clubs',CLUBS); D.drawList=j.draws||[]; store.set('draws',D.drawList); D.updated=j.updated||null;
+  CLUBS=j.clubs||{}; store.set('clubs',CLUBS); D.drawList=j.draws||[]; store.set('draws',D.drawList); const bk=j.brackets||{}; for(const id in bk){ D.draws[id]=Object.assign({},bk[id],{id,at:Date.now()}); } D.updated=j.updated||null;
   const out=((j.days||{})[date]||[]).map(m=>{ m=Object.assign({},m);
     if(m.court){ for(const k in CFG.venues){ if(CFG.venues[k].courts.includes(m.court)) m.v=k; }
       if(!m.v){ const ks=Object.keys(CFG.venues); if(ks.length===1){ m.v=ks[0]; const cs=CFG.venues[m.v].courts; cs.push(m.court); cs.sort((x,y)=>x-y); } } }
@@ -604,7 +604,7 @@ function matchCard(m, ctx, opt){
     '<div class="grow"><div class="mhead">'+dateTag+'<span class="ev">'+esc(m.ev)+' · '+esc(m.rd)+'</span>'+pill+'</div>'+
     teamHtml(m.a,m.sa,m.w===1,m.w===2,showSets?s1:[],live,opt.hl,m.tbd?'TBD':'Bye')+
     teamHtml(m.b,m.sb,m.w===2,m.w===1,showSets?s2:[],live,opt.hl,m.tbd?'TBD':'Bye')+
-    (opt.foot!==false?'<div class="mfoot"><span>Match '+esc(m.n)+'</span>'+(m.st==='F'&&m.du?'<span>'+m.du+' min</span>':'')+'</div>':'')+
+    (opt.foot!==false?'<div class="mfoot"><span>'+esc(m.dr||m.ev)+'</span>'+(m.st==='F'&&m.du?'<span>'+m.du+' min</span>':'')+'</div>':'')+
     '</div></article>';
 }
 function listWithNow(ms, ctx, opt){
@@ -709,11 +709,10 @@ function nextBanner(p, ctx){
   return '<div class="next">'+txt+'</div>';
 }
 
-function drawButtons(p){ // one button per event the player is in; opens the bracket with them highlighted
-  const evs=[...(p.ev||[])]; if(!evs.length) return '';
-  ensureDrawList();
-  if(!D.drawList) return '';
-  const bs=evs.map(ev=>{ const dr=drawFor(ev); return dr?'<button class="btn" data-act="draw" data-id="'+dr.id+'" data-pid="'+p.i+'" data-from="player">'+esc(ev)+' draw ›</button>':''; }).join('');
+function drawButtons(p){ // one button per draw the player is in (their group and the knock-out); opens it with them highlighted
+  const seen=new Map(); for(const m of matchesOf(p.i)){ if(m.did&&!seen.has(m.did)) seen.set(m.did,m.dr||m.ev); }
+  if(D.drawList) for(const dr of D.drawList){ const d=D.draws[dr.id]; if(!seen.has(dr.id)&&d&&d.m&&d.m.some(m=>playerInTeam(m.a,p.i)||playerInTeam(m.b,p.i))) seen.set(dr.id,dr.name); }
+  const bs=[...seen].map(([id,name])=>'<button class="btn" data-act="draw" data-id="'+esc(id)+'" data-pid="'+p.i+'" data-from="player">'+esc(name)+' ›</button>').join('');
   return bs?'<div class="row" style="margin-top:10px;flex-wrap:wrap">'+bs+'</div>':'';
 }
 function viewMe(ctx){
@@ -1117,20 +1116,30 @@ function compactDraw(res){
   const n0=out.filter(m=>m.c===0).length;
   return {m:out, cols, rounds, n0, v:DRAW_V};
 }
-async function loadDraw(id, force){
-  const cur=D.draws[id];
-  if(cur&&!force&&Date.now()-cur.at<10*60000) return cur;
-  if(!cur){ const c=store.get('draw:'+id); if(c&&c.m&&c.v===DRAW_V){ D.draws[id]=c; if(!force&&Date.now()-c.at<10*60000) return c; } else if(c) store.del('draw:'+id); }
-  if(D.drawBusy[id]) return D.drawBusy[id];
-  D.drawBusy[id]=(async()=>{
-    try{
-      const r=await fetch(DRAW_API+'vue-tournament-draw-data?tmtTab=draw&tmtId='+CFG.tmtId+'&drawId='+id,{cache:'default'});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      const j=await r.json(); const d=compactDraw(j); d.at=Date.now(); d.id=id;
-      D.draws[id]=d; store.set('draw:'+id,d); return d;
-    } finally { delete D.drawBusy[id]; }
-  })();
-  return D.drawBusy[id];
+async function loadDraw(id, force){ // brackets come with data.json
+  if(force||!D.draws[id]){ D.days={}; await load({force:true}); }
+  const d=D.draws[id]; if(!d) throw new Error('this draw has no bracket yet'); return d;
+}
+function isGroupDraw(dr){ return !!dr&&/liguilla|round robin|grupo/i.test((dr.type||'')+' '+dr.name); }
+function groupHtml(dr, ctx){ // a group: the table worked out from its matches, then the matches
+  const ms=allMatches().filter(m=>m.did===dr.id).sort((x,y)=>x.t<y.t?-1:x.t>y.t?1:0);
+  if(!ms.length) return '<div class="card empty">No matches in this group yet.</div>';
+  const T=new Map(), key=t=>t.map(p=>p.i).sort().join('+');
+  const team=t=>{ const k=key(t); let e=T.get(k); if(!e){ e={k,t,pl:0,w:0,l:0,gw:0,gl:0,pw:0,pa:0}; T.set(k,e); } return e; };
+  for(const m of ms){
+    if(m.a.length) team(m.a); if(m.b.length) team(m.b);
+    if(!m.a.length||!m.b.length||!(m.w===1||m.w===2)) continue;
+    const A=team(m.a), B=team(m.b); A.pl++; B.pl++; (m.w===1?A:B).w++; (m.w===1?B:A).l++;
+    for(const g of m.sc){ const x=+g[0]||0, y=+g[1]||0; A.pw+=x; A.pa+=y; B.pw+=y; B.pa+=x; if(x>y){ A.gw++; B.gl++; } else if(y>x){ B.gw++; A.gl++; } }
+  }
+  const rows=[...T.values()].sort((x,y)=>y.w-x.w||(y.gw-y.gl)-(x.gw-x.gl)||(y.pw-y.pa)-(x.pw-x.pa)||x.t[0].n.localeCompare(y.t[0].n));
+  const hl=new Set([S.draw&&S.draw.pid, S.me&&S.me.i].filter(Boolean));
+  const sg=n=>(n>0?'+':'')+n;
+  let html='<div class="card"><table class="stbl"><thead><tr><th>Player</th><th>P</th><th>W–L</th><th>Games</th><th>Points</th></tr></thead><tbody>'+
+    rows.map((e,i)=>'<tr class="tap'+(e.t.some(p=>hl.has(p.i))?' hi':'')+'" data-act="open" data-id="'+esc(e.t[0].i)+'"><td><span class="cn">'+(i+1)+'. '+e.t.map(p=>esc(p.n)).join(' / ')+'</span><div class="tiny muted">'+[...new Set(e.t.map(p=>cname(p.c)))].map(esc).join(' / ')+'</div></td><td>'+e.pl+'</td><td><b>'+e.w+'–'+e.l+'</b></td><td>'+e.gw+'–'+e.gl+'</td><td>'+sg(e.pw-e.pa)+'</td></tr>').join('')+
+    '</tbody></table><p class="tiny muted" style="margin:8px 0 0">Ordered by wins, then games and points difference. The official order can use head-to-head; check the venue board.</p></div>';
+  html+='<h2>Matches</h2><div class="stack">'+ms.map(m=>matchCard(m,ctx,{hl,markMine:true,noFade:true})).join('')+'</div>';
+  return html;
 }
 function drawMatch(d,c,r){ return d.m.find(m=>m.c===c&&m.r===r); }
 function playerInTeam(t,pid){ return t.some(p=>p.i===pid); }
@@ -1181,13 +1190,14 @@ function bbox(m, d, ctx, pid){ // one match box in the bracket
     return '<div class="bteam'+(winner?' win':'')+(loser?' lose':'')+(me?' me':'')+'">'+(t.length?'<span class="bflag">'+flag(cc)+'</span>':'<span class="bflag"></span>')+'<span class="bn">'+nm+(seed?' <span class="seed">['+esc(seed)+']</span>':'')+'</span><span class="bs">'+sets.map(x=>'<span>'+x+'</span>').join('')+'</span></div>';
   };
   const s1=sc.map(x=>x[0]), s2=sc.map(x=>x[1]);
-  return '<div class="bbox'+(mine?' mine':'')+(bye?' bye':'')+(tbd&&!bye?' tbd':'')+(st==='P'?' live':'')+'" data-code="'+esc(m.n)+'"><div class="bmeta"><span>'+meta+'</span><span class="mn">'+(bye||tbd?'':esc(m.n))+'</span></div>'+row(a,m.ab,sa,w===1,w===2,s1)+row(b,m.bb,sb,w===2,w===1,s2)+'</div>';
+  return '<div class="bbox'+(mine?' mine':'')+(bye?' bye':'')+(tbd&&!bye?' tbd':'')+(st==='P'?' live':'')+'" data-code="'+esc(m.n)+'"><div class="bmeta"><span>'+meta+'</span><span class="mn"></span></div>'+row(a,m.ab,sa,w===1,w===2,s1)+row(b,m.bb,sb,w===2,w===1,s2)+'</div>';
 }
 function viewDraw(ctx){
   ensureDrawList();
   const dr=(D.drawList||[]).find(x=>x.id===S.draw.id); const d=D.draws[S.draw.id];
   const backLabel=S.draw.from==='player'?'‹ Player':S.draw.from==='stats'?'‹ Stats':'‹ Draws';
   let html='<div class="row" style="margin-bottom:6px"><button class="btn ghost" data-act="drawback">'+backLabel+'</button><h2 class="grow" style="margin:0">'+esc(dr?dr.name:'Draw')+'</h2>'+(S.draw.pid&&d&&playerMatchesInDraw(d,S.draw.pid).length?'<button class="btn" data-act="jumpme">Find me</button>':'')+'</div>';
+  if(isGroupDraw(dr)) return html+groupHtml(dr,ctx);
   if(!d){
     if(S.drawErr) html+='<div class="banner err">Could not load the draw ('+esc(S.drawErr)+'). <button class="btn ghost" data-act="drawretry">Retry</button></div>';
     else { html+='<div class="stack"><div class="skel"></div><div class="skel"></div></div>'; if(!D.drawBusy[S.draw.id]) loadDraw(S.draw.id).then(()=>render({bg:true})).catch(e=>{ S.drawErr=String(e&&e.message||e); render({bg:true}); }); }
@@ -1221,7 +1231,7 @@ function viewDraw(ctx){
     html+='</div></div>';
   });
   html+='</div>';
-  html+='<p class="tiny muted" style="margin-top:8px">Swipe the bracket sideways to move through the rounds; lines show which matches feed the next one. '+(parts.length>1?'Big draws are split into parts of '+SECTION+' first-round places; the Finals part shows where the parts meet.':'')+'</p>';
+  html+='<p class="tiny muted" style="margin-top:8px"><a href="'+drawUrl(S.draw.id)+'" target="_blank" rel="noopener">Open on badminton.es</a>. Swipe the bracket sideways to move through the rounds; lines show which matches feed the next one. '+(parts.length>1?'Big draws are split into parts of '+SECTION+' first-round places; the Finals part shows where the parts meet.':'')+'</p>';
   return html;
 }
 function afterDrawRender(){ // wire up swipe tracking and initial position; called after the view is in the DOM
@@ -1251,7 +1261,7 @@ function viewDraws(ctx){ // the Draws tab: pick an event
     if(!ds.length) continue;
     html+='<div class="ev" style="margin:14px 0 6px">'+esc(CAT_NAMES[pre])+'</div><div class="cgrid">'+ds.map(x=>'<button class="chip" data-act="draw" data-id="'+x.id+'" data-pid="'+(me?me.i:'')+'" data-from="list">'+esc(x.name)+'<span class="n">'+(x.size||'')+'</span></button>').join('')+'</div>';
   }
-  html+='<p class="small muted" style="margin-top:14px">Numbers are the draw size. Draws open on badminton.es.</p>';
+  html+='<p class="small muted" style="margin-top:14px">Numbers are the draw size.</p>';
   return html;
 }
 /* ---------- hash / sharing ---------- */
@@ -1271,7 +1281,7 @@ function updHash(){
 function readHash(){
   const h=(location.hash||'').slice(1);
   if(!h) return;
-  
+  const dm=/^d=(\d+)(?:-(\d+))?$/.exec(h); if(dm){ S.tab='draws'; S.draw={id:dm[1], pid:dm[2]||null, from:'list', part:null}; return; }
   const m=/^p=(\d+)$/.exec(h); if(m){ S.tab='players'; S.pendingPlayer=m[1]; S.draw=null; S.from=null; return; }
   const c=/^c=([^&]+)$/.exec(h); if(c){ S.tab='countries'; S.country=c[1]; S.draw=null; return; }
   const tabs={venues:1,players:1,me:1,draws:1,countries:1,stats:1,usage:1};
@@ -1316,7 +1326,7 @@ document.getElementById('view').addEventListener('click',e=>{
   else if(act==='opencountry'){ S.country=b.dataset.cc; store.set('country',S.country); S.cday=null; S.cfilter='all'; S.tab='countries'; store.set('tab',S.tab); S.from=null; render(); }
   else if(act==='follow'){ const p=pick(); if(!p) return; if(isFollowed(p.i)) S.follow=S.follow.filter(x=>x.i!==p.i); else S.follow.push(p); store.set('follow',S.follow); render({keepScroll:true}); }
   else if(act==='share'){ share(id,b.dataset.name||''); }
-  else if(act==='draw'){ window.open(drawUrl(b.dataset.id),'_blank','noopener'); }
+  else if(act==='draw'){ if(b.dataset.from==='stats') S.statsY=window.scrollY||0; S.draw={id:b.dataset.id, pid:b.dataset.pid||null, from:b.dataset.from||'list', part:null}; S.drawErr=null; store.set('lastdraw',b.dataset.id); render(); }
   else if(act==='drawback'){ const from=S.draw&&S.draw.from; S.draw=null; if(from==='list'){ S.tab='draws'; store.set('tab',S.tab); } if(from==='stats'){ S.tab='stats'; render(); window.scrollTo(0,S.statsY||0); } else render(); }
   else if(act==='drawpart'){ if(S.draw){ S.draw.part=b.dataset.part; S.draw.scrollCol=0; S.draw.keepLeft=null; render(); } }
   else if(act==='drawcol'){ const br=document.getElementById('bracket'); if(br&&br.__toCol) br.__toCol(+b.dataset.i,true); }
